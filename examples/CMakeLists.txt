@@ -269,5 +269,5 @@ SUBDIRS(
   widgetgallery
   wt-homepage
   wtwithqt
-  extensions
+  test_extensions
 )
