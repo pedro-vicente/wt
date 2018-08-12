@@ -703,8 +703,8 @@ public:
 
     std::vector<double> first = topojson.get_first();
     int ifirst[2];
-    ifirst[0] = first[0];
-    ifirst[1] = first[1];
+    ifirst[0] = (int)first[0];
+    ifirst[1] = (int)first[1];
     std::vector<double> center = topojson.transform_point(ifirst);
 
     std::unique_ptr<WLeaflet> leaflet =
@@ -1087,10 +1087,12 @@ int main(int argc, char **argv)
     if (read_dc311(data_file) < 0)
     {
       assert(0);
+      exit(1);
     }
     if (geojson.convert(geojson_file.c_str()) < 0)
     {
       assert(0);
+      exit(1);
     }
   }
 
@@ -1103,10 +1105,12 @@ int main(int argc, char **argv)
     if (geojson_file.empty())
     {
       usage();
+      exit(1);
     }
     if (geojson.convert(geojson_file.c_str()) < 0)
     {
       assert(0);
+      exit(1);
     }
   }
 
@@ -1119,10 +1123,12 @@ int main(int argc, char **argv)
     if (data_file.empty())
     {
       usage();
+      exit(1);
     }
     if (read_datasets(data_file.c_str(), datasets) < 0)
     {
       assert(0);
+      exit(1);
     }
   }
 
@@ -1135,6 +1141,7 @@ int main(int argc, char **argv)
     if (data_file.empty() || data_file_us_states_pop.empty() || geojson_file.empty())
     {
       usage();
+      exit(1);
     }
 
     std::cout << data_file << std::endl;
@@ -1144,6 +1151,7 @@ int main(int argc, char **argv)
     if (data_file.empty() || geojson_file.empty())
     {
       usage();
+      exit(1);
     }
     if (read_ep_pop(data_file, data_file_us_states_pop) < 0)
     {
@@ -1152,6 +1160,7 @@ int main(int argc, char **argv)
     if (geojson.convert(geojson_file.c_str()) < 0)
     {
       assert(0);
+      exit(1);
     }
   }
   ///////////////////////////////////////////////////////////////////////////////////////
@@ -1166,18 +1175,22 @@ int main(int argc, char **argv)
     if (read_schools(data_file) < 0)
     {
       assert(0);
+      exit(1);
     }
     if (read_json_montgomery_county(geojson_file.c_str(), lat_montgomery, lon_montgomery) < 0)
     {
       assert(0);
+      exit(1);
     }
     if (read_json_wmata(file_wmata_stations, lat_wmata, lon_wmata) < 0)
     {
       assert(0);
+      exit(1);
     }
     if (geojson.convert(zip_geojson_file.c_str()) < 0)
     {
       assert(0);
+      exit(1);
     }
   }
 
@@ -1191,6 +1204,7 @@ int main(int argc, char **argv)
     if (topojson.convert(geojson_file.c_str()) < 0)
     {
       assert(0);
+      exit(1);
     }
   }
 
@@ -1203,6 +1217,7 @@ int main(int argc, char **argv)
     if (read_dc311(data_file) < 0)
     {
       assert(0);
+      exit(1);
     }
   }
   else if (test.compare("9") == 0)
@@ -1210,15 +1225,18 @@ int main(int argc, char **argv)
     if (data_file.empty())
     {
       usage();
+      exit(1);
     }
     if (read_datasets(data_file.c_str(), datasets) < 0)
     {
       assert(0);
+      exit(1);
     }
   }
   else
   {
     assert(0);
+    exit(1);
   }
 
   for (size_t idx = 0; idx < 3 * 256; idx += 3)
@@ -1500,7 +1518,9 @@ int read_json_montgomery_county(const std::string &file_name, std::vector<double
   buf = (char*)malloc(length);
   if (buf)
   {
-    fread(buf, 1, length, f);
+    if (fread(buf, 1, length, f) < 0)
+    {
+    }
   }
   fclose(f);
 
@@ -1597,7 +1617,9 @@ int read_json_wmata(const std::string &file_name, std::vector<double> &lat, std:
   buf = (char*)malloc(length);
   if (buf)
   {
-    fread(buf, 1, length, f);
+    if (fread(buf, 1, length, f) < 0)
+    {
+    }
   }
   fclose(f);
 
