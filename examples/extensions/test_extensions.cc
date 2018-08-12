@@ -21,28 +21,28 @@
 #include "pal_rgb.h"
 using namespace Wt;
 
-//./leaflet_test.wt --http-address=0.0.0.0 --http-port=8080  --docroot=.
+//./test_extensions.wt --http-address=0.0.0.0 --http-port=8080  --docroot=.
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //example 2
 //DC311 rodent complaints and DC wards geojson
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//-t 2 -d ../../../examples/leaflet_test/data/dc_311-2016.csv.s0311.csv -g ../../../examples/leaflet_test/data/ward-2012.geojson
+//-t 2 -d ../../../examples/extensions/data/dc_311-2016.csv.s0311.csv -g ../../../examples/extensions/data/ward-2012.geojson
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //example 3
 //US states geojson
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//-t 3 -g ../../../examples/leaflet_test/gz_2010_us_040_00_20m.json
+//-t 3 -g ../../../examples/extensions/gz_2010_us_040_00_20m.json
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //example 4
 //NOAA ATMS data
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//-t 4 -d ../../../examples/leaflet_test/data/TATMS_npp_d20141130_t1817273_e1817589_b16023_c20141201005810987954_noaa_ops.h5.star.json
+//-t 4 -d ../../../examples/extensions/data/TATMS_npp_d20141130_t1817273_e1817589_b16023_c20141201005810987954_noaa_ops.h5.star.json
 
 std::vector<star_dataset_t> datasets;
 star_dataset_t find_dataset(std::string name);
@@ -53,26 +53,26 @@ star_dataset_t find_dataset(std::string name);
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //-t 5 
-//-d ../../../examples/leaflet_test/us_states_epilepsy_2015.csv 
-//-g ../../../examples/leaflet_test/gz_2010_us_040_00_20m.json 
-//-u ../../../examples/leaflet_test/us_states_population_2015.csv
+//-d ../../../examples/extensions/us_states_epilepsy_2015.csv 
+//-g ../../../examples/extensions/gz_2010_us_040_00_20m.json 
+//-u ../../../examples/extensions/us_states_population_2015.csv
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //example 6
 //schools
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//-t 6 -d ../../../examples/leaflet_test/montgomery_county_schools.csv
-//-g ../../../examples/leaflet_test/montgomery_county_boundary.json 
-//-m ../../../examples/leaflet_test/wmata_stations.json
-//-z ../../../examples/leaflet_test/md_maryland_zip_codes_geo.min.json
+//-t 6 -d ../../../examples/extensions/montgomery_county_schools.csv
+//-g ../../../examples/extensions/montgomery_county_boundary.json 
+//-m ../../../examples/extensions/wmata_stations.json
+//-z ../../../examples/extensions/md_maryland_zip_codes_geo.min.json
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //example 7
 //topojson sample
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//-t 7 -g ../../../examples/leaflet_test/example.quantized.topojson
+//-t 7 -g ../../../examples/extensions/example.quantized.topojson
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //example 8
@@ -80,7 +80,7 @@ star_dataset_t find_dataset(std::string name);
 //DC311 rodent complaints 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//-t 8 -d ../../../examples/leaflet_test/data/dc_311-2016.csv.s0311.csv 
+//-t 8 -d ../../../examples/extensions/data/dc_311-2016.csv.s0311.csv 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //example 9
@@ -88,7 +88,7 @@ star_dataset_t find_dataset(std::string name);
 //NOAA ATMS
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//-t 9 -d ../../../examples/leaflet_test/data/TATMS_npp_d20141130_t1817273_e1817589_b16023_c20141201005810987954_noaa_ops.h5.star.json 
+//-t 9 -d ../../../examples/extensions/data/TATMS_npp_d20141130_t1817273_e1817589_b16023_c20141201005810987954_noaa_ops.h5.star.json 
 
 
 std::vector<school_t> schools_list;
@@ -1008,7 +1008,7 @@ std::unique_ptr<WApplication> create_application(const WEnvironment& env)
 
 void usage()
 {
-  std::cout << "usage: ./leaflet_test.wt --http-address=0.0.0.0 --http-port=8080  --docroot=. ";
+  std::cout << "usage: ./test_extensions.wt --http-address=0.0.0.0 --http-port=8080  --docroot=. ";
   std::cout << "-t TEST <-d DATABASE> <-u DATABASE> <-g GEOJSON> <-z GEOJSON> ";
   std::cout << std::endl;
   std::cout << "-t TEST: test number (1 to 6)" << std::endl;
