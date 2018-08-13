@@ -36,7 +36,7 @@ using namespace Wt;
 //US states geojson
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//-t 3 -g ../../../examples/test_extensions/gz_2010_us_040_00_20m.json
+//-t 3 -g ../../../examples/test_extensions/data/gz_2010_us_040_00_20m.json
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //example 4
@@ -255,7 +255,7 @@ public:
   {
     setTitle("geojson");
     std::unique_ptr<WLeaflet> leaflet =
-      cpp14::make_unique<WLeaflet>(tile_provider_t::CARTODB, 38.9072, -77.0369, 8);
+      cpp14::make_unique<WLeaflet>(tile_provider_t::CARTODB, 37.0902, -95.7129, 5);
 
     ///////////////////////////////////////////////////////////////////////////////////////
     //render geojson
@@ -1353,6 +1353,7 @@ int main(int argc, char **argv)
 
   else if (test.compare("8") == 0)
   {
+    std::cout << data_file << std::endl;
     if (read_dc311(data_file) < 0)
     {
       assert(0);
@@ -1361,6 +1362,7 @@ int main(int argc, char **argv)
   }
   else if (test.compare("9") == 0)
   {
+    std::cout << data_file << std::endl;
     if (data_file.empty())
     {
       usage();
@@ -1374,6 +1376,7 @@ int main(int argc, char **argv)
   }
   else if (test.compare("10") == 0)
   {
+    std::cout << data_file << std::endl;
     file_plotly = data_file;
   }
   else
