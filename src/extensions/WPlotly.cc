@@ -63,7 +63,7 @@ namespace Wt
         << "}\n"
         << initFunction.toUTF8() << "();\n";
 
-      if (1) LOG_INFO(strm.str());
+      if (0) LOG_INFO(strm.str());
       app->doJavaScript(strm.str(), true);
     }
 
