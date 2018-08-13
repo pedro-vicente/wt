@@ -6,9 +6,15 @@ Wt.extensions is a fork (branch extensions) that adds use of several popular Jav
 
 [Leaflet](http://leafletjs.com/)
 
+![image](https://user-images.githubusercontent.com/6119070/44011785-916e3b40-9e88-11e8-938d-d835da2690da.png)
+
 [Plotly.js](https://plot.ly/javascript/)
 
+![image](https://user-images.githubusercontent.com/6119070/44011812-c712a588-9e88-11e8-8e67-472a0663225d.png)
+
 [Cesium](https://cesiumjs.org/)
+
+![image](https://user-images.githubusercontent.com/6119070/44011818-d6f8543e-9e88-11e8-9995-6a1ad707e005.png)
 
 # Examples
 
