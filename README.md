@@ -64,6 +64,19 @@ http://www.eden-earth.org:8086/
 -m ../../../examples/test_extensions/wmata_stations.json
 -z ../../../examples/test_extensions/md_maryland_zip_codes_geo.min.json
 
+## US states (Leaflet)
+
+### demo
+
+http://www.eden-earth.org:8083/
+
+![image](https://user-images.githubusercontent.com/6119070/44009572-eb420a2e-9e7a-11e8-83f8-9ef85d6bea71.png)
+
+### run
+
+./test_extensions.wt --http-address=0.0.0.0 --http-port=8080  --docroot=.
+-t 3 -g ../../../examples/test_extensions/data/gz_2010_us_040_00_20m.json
+
 ## NOAA ATMS satellite data (Leaflet, Cesium)
 
 ### demo
@@ -77,6 +90,18 @@ http://www.eden-earth.org:8089/
 ./test_extensions.wt --http-address=0.0.0.0 --http-port=8080  --docroot=.
 -t 9 -d ../../../examples/test_extensions/data/TATMS_npp_d20141130_t1817273_e1817589_b16023_c20141201005810987954_noaa_ops.h5.star.json 
 
+## Dow Jones chart(Plotly)
+
+### demo
+
+http://www.eden-earth.org:8090/
+
+![image](https://user-images.githubusercontent.com/6119070/44009396-921a8a4e-9e79-11e8-8141-99f855a0f769.png)
+
+### run
+
+./test_extensions.wt --http-address=0.0.0.0 --http-port=8080  --docroot=.
+-t 10 -d ../../../examples/test_extensions/data/DJI_2018_minor.3600.txt
 
 # Building Wt.extensions
 
