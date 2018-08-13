@@ -90,6 +90,12 @@ star_dataset_t find_dataset(std::string name);
 
 //-t 9 -d ../../../examples/test_extensions/data/TATMS_npp_d20141130_t1817273_e1817589_b16023_c20141201005810987954_noaa_ops.h5.star.json 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//example 10
+//plot
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//-t 10 -f ../../../examples/test_extensions/data/DJI_2018_minor.3600.txt
 
 std::vector<school_t> schools_list;
 std::vector<double> lat_montgomery;
@@ -958,6 +964,33 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
+//Application_plotly
+///////////////////////////////////////////////////////////////////////////////////////
+
+class Application_plotly : public WApplication
+{
+public:
+  Application_plotly(const WEnvironment& env) : WApplication(env)
+  {
+    setTitle("Chart");
+    std::string js;
+
+    js += "var trace1 = {";
+    js += "x: [1, 2, 3, 4],";
+    js += "y: [10, 15, 13, 17],";
+    js += "type: 'scatter'";
+    js += "};";
+    js += "var data = [trace1];";
+
+    js += "var layout = {};";
+
+    std::unique_ptr<WPlotly> plotly = cpp14::make_unique<WPlotly>(js);
+    root()->addWidget(Wt::cpp14::make_unique<Wt::WText>("Plot"));
+    root()->addWidget(std::move(plotly));
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////////////
 //create_application
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -998,6 +1031,10 @@ std::unique_ptr<WApplication> create_application(const WEnvironment& env)
   else if (test.compare("9") == 0)
   {
     return cpp14::make_unique<Application_celsium_atms>(env);
+  }
+  else if (test.compare("10") == 0)
+  {
+    return cpp14::make_unique<Application_plotly>(env);
   }
   assert(0);
 }
@@ -1232,6 +1269,10 @@ int main(int argc, char **argv)
       assert(0);
       exit(1);
     }
+  }
+  else if (test.compare("10") == 0)
+  {
+
   }
   else
   {
