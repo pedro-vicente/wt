@@ -1,5 +1,5 @@
-#ifndef WCelsium_H_
-#define WCelsium_H_
+#ifndef WCesium_H_
+#define WCesium_H_
 
 #include <Wt/WColor.h>
 #include <Wt/WCompositeWidget.h>
@@ -11,13 +11,13 @@
 namespace Wt
 {
   ///////////////////////////////////////////////////////////////////////////////////////
-  //WCelsium
+  //WCesium
   ///////////////////////////////////////////////////////////////////////////////////////
 
-  class WT_API WCelsium : public WCompositeWidget
+  class WT_API WCesium : public WCompositeWidget
   {
   public:
-    WCelsium(const std::string &js);
+    WCesium(const std::string &js);
   protected:
     virtual void render(WFlags<RenderFlag> flags);
     std::string m_javascrit;

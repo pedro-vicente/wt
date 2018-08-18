@@ -9,17 +9,17 @@
 #include <iostream>
 #include <cmath>
 
-#include "extensions/WCelsium.hh"
+#include "extensions/WCesium.hh"
 
 namespace Wt
 {
-  LOGGER("WCelsium");
+  LOGGER("WCesium");
 
   ///////////////////////////////////////////////////////////////////////////////////////
-  //WCelsium::WCelsium
+  //WCesium::WCesium
   ///////////////////////////////////////////////////////////////////////////////////////
 
-  WCelsium::WCelsium(const std::string &js)
+  WCesium::WCesium(const std::string &js)
   {
     setImplementation(std::unique_ptr<WWidget>(new WContainerWidget()));
     this->addCssRule("html", "width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;");
@@ -28,15 +28,15 @@ namespace Wt
     WApplication *app = WApplication::instance();
     app->useStyleSheet("http://cesiumjs.org/releases/1.48/Build/Cesium/Widgets/widgets.css");
     const std::string library = "http://cesiumjs.org/releases/1.48/Build/Cesium/Cesium.js";
-    app->require(library, "celsium");
+    app->require(library, "cesium");
     m_javascrit = js;
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////
-  //WCelsium::render
+  //WCesium::render
   ///////////////////////////////////////////////////////////////////////////////////////
 
-  void WCelsium::render(WFlags<RenderFlag> flags)
+  void WCesium::render(WFlags<RenderFlag> flags)
   {
     if (flags.test(RenderFlag::Full))
     {
@@ -63,7 +63,7 @@ namespace Wt
         << "}\n"
         << initFunction.toUTF8() << "();\n";
 
-      if (1) LOG_INFO(strm.str());
+      if (0) LOG_INFO(strm.str());
       app->doJavaScript(strm.str(), true);
     }
     Wt::WCompositeWidget::render(flags);

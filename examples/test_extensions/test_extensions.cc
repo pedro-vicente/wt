@@ -13,7 +13,7 @@
 #include "gason.h"
 #include "extensions/WLeaflet.hh"
 #include "extensions/WPlotly.hh"
-#include "extensions/WCelsium.hh"
+#include "extensions/WCesium.hh"
 #include "extensions/csv.hh"
 #include "extensions/geojson.hh"
 #include "extensions/topojson.hh"
@@ -830,7 +830,7 @@ public:
       js += "}));";//add
     }
 
-    std::unique_ptr<WCelsium> celsium = cpp14::make_unique<WCelsium>(js);
+    std::unique_ptr<WCesium> celsium = cpp14::make_unique<WCesium>(js);
     root()->addWidget(std::move(celsium));
   }
 };
@@ -853,7 +853,7 @@ class Application_celsium_atms : public WApplication
 public:
   Application_celsium_atms(const WEnvironment& env) : WApplication(env)
   {
-    setTitle("Celsium NOAA ATMS");
+    setTitle("Cesium NASA HDF5");
     std::string js;
 
     star_dataset_t temperature = find_dataset("AntennaTemperature");
@@ -960,7 +960,7 @@ public:
       }
     }
 
-    std::unique_ptr<WCelsium> celsium = cpp14::make_unique<WCelsium>(js);
+    std::unique_ptr<WCesium> celsium = cpp14::make_unique<WCesium>(js);
     root()->addWidget(std::move(celsium));
   }
 };
