@@ -56,6 +56,9 @@ http://www.eden-earth.org:8082/
 
 ## Montgomery County schools (Leaflet)
 
+This example shows Montgomery County, MD, schools, with a color rating. The red circles are Metro Read line stations.
+The county boundaries is read from .geoJSON files and shown as polygons.
+
 ### demo
 
 http://www.eden-earth.org:8086/
@@ -72,6 +75,8 @@ http://www.eden-earth.org:8086/
 
 ## US states (Leaflet)
 
+This example shows US states, with random colors. The topograghy is read from .geoJSON files.
+
 ### demo
 
 http://www.eden-earth.org:8083/
@@ -83,7 +88,14 @@ http://www.eden-earth.org:8083/
 ./test_extensions.wt --http-address=0.0.0.0 --http-port=8080  --docroot=.
 -t 3 -g ../../../examples/test_extensions/data/gz_2010_us_040_00_20m.json
 
-## NOAA ATMS satellite data (Leaflet, Cesium)
+## NASA ATMS HDF5 satellite data (Cesium)
+
+The Advanced Technology Microwave Sounder (ATMS) is a NASA satellite that measures atmospheric temperature and moisture for weather forecasting, 
+and its data is saved in HDF5.
+https://jointmission.gsfc.nasa.gov/atms.html
+HDF5 (Hierarchical Data Format) is a data format funded by NASA and its original use was to store NASA satellite data.
+https://www.hdfgroup.org/
+This example shows HDF5 ATMS data (converted to JSON)
 
 ### demo
 
@@ -97,6 +109,8 @@ http://www.eden-earth.org:8089/
 -t 9 -d ../../../examples/test_extensions/data/TATMS_npp_d20141130_t1817273_e1817589_b16023_c20141201005810987954_noaa_ops.h5.star.json 
 
 ## Dow Jones chart(Plotly)
+
+This example shows a Plotly.js chart using data from Dow Jones Industrial Average index, read from a CSV file.
 
 ### demo
 
