@@ -20,6 +20,12 @@
 #include "extensions/star_json.hh"
 #include "extensions/star_dataset.hh"
 #include "pal_rgb.h"
+
+#include <thread>
+#include <chrono>
+#include <Wt/WContainerWidget.h>
+#include <Wt/WProgressBar.h>
+#include <Wt/WTimer.h>
 using namespace Wt;
 
 //./test_extensions.wt --http-address=0.0.0.0 --http-port=8080  --docroot=.
@@ -1093,6 +1099,67 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
+//PushWidget
+///////////////////////////////////////////////////////////////////////////////////////
+
+class PushWidget : public WContainerWidget
+{
+public:
+  PushWidget() :
+    WContainerWidget(),
+    m_iter(0)
+  {
+    m_text = this->addWidget(cpp14::make_unique<WText>(Wt::asString(m_iter)));
+    m_timer = cpp14::make_unique<WTimer>();
+    m_timer->setInterval(std::chrono::milliseconds{ 1000 });
+    m_timer->timeout().connect(this, &PushWidget::tick);
+    m_timer->start();
+  }
+
+private:
+  std::unique_ptr<WTimer> m_timer;
+  WText *m_text;
+  size_t m_iter;
+
+  void tick()
+  {
+    m_timer->stop();
+    WApplication *app = WApplication::instance();
+    app->enableUpdates(true);
+    while (true)
+    {
+      std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+      WApplication::UpdateLock uiLock(app);
+      if (uiLock)
+      {
+        m_iter++;
+        m_text->setText(Wt::asString(m_iter));
+        app->triggerUpdate();
+        app->processEvents();
+      }
+      else
+      {
+        return;
+      }
+    }
+  }
+};
+
+//////////////////////////////////////////////////////////////////////////////////////
+//Application_update
+///////////////////////////////////////////////////////////////////////////////////////
+
+class Application_update : public WApplication
+{
+public:
+  Application_update(const WEnvironment& env) : WApplication(env)
+  {
+    std::unique_ptr<PushWidget> update = cpp14::make_unique<PushWidget>();
+    root()->addWidget(std::move(update));
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////////////
 //create_application
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -1137,6 +1204,10 @@ std::unique_ptr<WApplication> create_application(const WEnvironment& env)
   else if (test.compare("10") == 0)
   {
     return cpp14::make_unique<Application_plotly>(env);
+  }
+  else if (test.compare("11") == 0)
+  {
+    return cpp14::make_unique<Application_update>(env);
   }
   assert(0);
 }
@@ -1378,6 +1449,10 @@ int main(int argc, char **argv)
   {
     std::cout << data_file << std::endl;
     file_plotly = data_file;
+  }
+  else if (test.compare("11") == 0)
+  {
+
   }
   else
   {
