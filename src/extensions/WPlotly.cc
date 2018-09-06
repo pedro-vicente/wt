@@ -26,7 +26,11 @@ namespace Wt
     this->addCssRule("body", "height: 100%");
     this->addCssRule("#" + id(), "position:relative; top:0; bottom:0; height: 100%");
     WApplication *app = WApplication::instance();
+#if defined (_DEBUG)
+    const std::string library = "plotly-latest.min.js";
+#else
     const std::string library = "https://cdn.plot.ly/plotly-latest.min.js";
+#endif
     app->require(library, "plotly");
     m_javascrit = js;
   }
@@ -63,7 +67,7 @@ namespace Wt
         << "}\n"
         << initFunction.toUTF8() << "();\n";
 
-      if (0) LOG_INFO(strm.str());
+      if (1) LOG_INFO(strm.str());
       app->doJavaScript(strm.str(), true);
     }
 

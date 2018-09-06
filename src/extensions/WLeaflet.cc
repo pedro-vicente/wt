@@ -33,8 +33,13 @@ namespace Wt
     this->addCssRule("body", "height: 100%");
     this->addCssRule("#" + id(), "position:relative; top:0; bottom:0; height: 100%");
     WApplication *app = WApplication::instance();
+#if defined (_DEBUG)
+    app->useStyleSheet("leaflet.css");
+    const std::string leaflet = "leaflet.js";
+#else
     app->useStyleSheet("https://unpkg.com/leaflet@1.2.0/dist/leaflet.css");
     const std::string leaflet = "https://unpkg.com/leaflet@1.2.0/dist/leaflet.js";
+#endif
     app->require(leaflet, "leaflet");
   }
   ///////////////////////////////////////////////////////////////////////////////////////
