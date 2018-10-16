@@ -78,6 +78,15 @@ namespace Wt
           << "  });\n";
       }
 
+      ///////////////////////////////////////////////////////////////////////////////////////
+      //add promitives/data
+      ///////////////////////////////////////////////////////////////////////////////////////
+
+      for (size_t idx = 0; idx < m_additions.size(); idx++)
+      {
+        strm << m_additions[idx];
+      }
+
       strm
         << "  setTimeout(function(){ delete " << initFunction.toUTF8() << ";}, 0)};\n"
         << "}\n"
@@ -87,6 +96,28 @@ namespace Wt
     }
 
     Wt::WCompositeWidget::render(flags);
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////////
+  //WMapbox::Circle
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+  void WMapbox::Circle(const std::string &lat, const std::string &lon)
+  {
+    Wt::WStringStream strm;
+
+    strm
+      << " var opt = {radius: 1000, stroke: false, color: '#ff0000'}\n";
+
+    std::string str_ll;
+    str_ll = lat;
+    str_ll += ",";
+    str_ll += lon;
+
+    strm
+      << " var c = new L.circle([" << str_ll << "], opt).addTo(map);\n";
+
+    m_additions.push_back(strm.str());
   }
 
 

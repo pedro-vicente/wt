@@ -30,6 +30,9 @@ public:
     std::unique_ptr<WText> text = cpp14::make_unique<WText>("item 1");
     hbox->addWidget(std::move(text));
     std::unique_ptr<WMapbox> leaflet = cpp14::make_unique<WMapbox>();
+
+    //38.9072, -77.0369
+    leaflet->Circle("38.9072", "-77.0369");
     hbox->addWidget(std::move(leaflet));
   }
 };

@@ -18,9 +18,11 @@ namespace Wt
   {
   public:
     WMapbox();
+    void Circle(const std::string &lat, const std::string &lon);
 
   protected:
     virtual void render(WFlags<RenderFlag> flags);
+    std::vector<std::string> m_additions;
   };
 
 } //namespace Wt
