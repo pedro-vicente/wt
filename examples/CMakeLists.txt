@@ -270,4 +270,5 @@ SUBDIRS(
   wt-homepage
   wtwithqt
   test_extensions
+  test_mapbox
 )

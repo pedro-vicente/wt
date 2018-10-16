@@ -1,0 +1,12 @@
+<server>
+  <application-settings location="*">
+    <properties>
+       <property name="google_api_key">
+       API_KEY
+       </property>
+       <property name="mapbox_api_key">
+       API_KEY
+       </property>
+    </properties>
+  </application-settings>
+</server>
