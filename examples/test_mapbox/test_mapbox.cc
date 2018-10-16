@@ -31,8 +31,7 @@ public:
     hbox->addWidget(std::move(text));
     std::unique_ptr<WMapbox> leaflet = cpp14::make_unique<WMapbox>();
 
-    //38.9072, -77.0369
-    leaflet->Circle("38.9072", "-77.0369");
+    leaflet->Circle(38.9072, -77.0369, 500, "#ff0000");
     hbox->addWidget(std::move(leaflet));
   }
 };

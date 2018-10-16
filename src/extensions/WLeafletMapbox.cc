@@ -1,4 +1,4 @@
-#include "Wt/WLogger"
+#include "Wt/WLogger.h"
 #include <Wt/WApplication.h>
 #include <Wt/WContainerWidget.h>
 #include "web/WebUtils.h"
@@ -102,22 +102,28 @@ namespace Wt
   //WMapbox::Circle
   ///////////////////////////////////////////////////////////////////////////////////////
 
-  void WMapbox::Circle(const std::string &lat, const std::string &lon)
+  void WMapbox::Circle(const double lat, const double lon, const double radius, const std::string &color)
   {
     Wt::WStringStream strm;
+    std::string str_clr = std::to_string((long double)radius);
 
     strm
-      << " var opt = {radius: 1000, stroke: false, color: '#ff0000'}\n";
+      << " var opt = {radius:"
+      << radius
+      << ", stroke: false, color: '"
+      << color
+      << "'}\n";
 
     std::string str_ll;
-    str_ll = lat;
+    str_ll = std::to_string((long double)lat);
     str_ll += ",";
-    str_ll += lon;
+    str_ll += std::to_string((long double)lon);
 
     strm
       << " var c = new L.circle([" << str_ll << "], opt).addTo(map);\n";
 
     m_additions.push_back(strm.str());
+
   }
 
 
