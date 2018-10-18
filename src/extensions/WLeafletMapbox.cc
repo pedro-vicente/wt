@@ -92,6 +92,8 @@ namespace Wt
         << "}\n"
         << initFunction.toUTF8() << "();\n";
 
+      //clear primitives, already rendered
+      m_additions.clear();
       app->doJavaScript(strm.str());
     }
 

@@ -36,12 +36,24 @@ public:
     m_text = hbox->addWidget(cpp14::make_unique<WText>(Wt::asString(m_iter)));
     m_leaflet = hbox->addWidget(cpp14::make_unique<WMapbox>());
     m_leaflet->Circle(38.9072, -77.0369, 500, "#ff0000");
+
+    m_timer = cpp14::make_unique<WTimer>();
+    m_timer->setInterval(std::chrono::milliseconds{ 4000 });
+    m_timer->timeout().connect(this, &MapApplication::tick);
+    m_timer->start();
   }
 
 private:
   WText *m_text;
   WMapbox *m_leaflet;
   size_t m_iter;
+  std::unique_ptr<WTimer> m_timer;
+
+  void tick()
+  {
+    m_iter++;
+    m_text->setText(Wt::asString(m_iter));
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
