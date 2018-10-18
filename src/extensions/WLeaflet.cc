@@ -195,6 +195,34 @@ namespace Wt
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////
+  //WLeaflet::Circle
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+  void WLeaflet::Circle(const double lat, const double lon, const double radius, const std::string &color)
+  {
+    Wt::WStringStream strm;
+    std::string str_clr = std::to_string((long double)radius);
+
+    strm
+      << " var opt = {radius:"
+      << radius
+      << ", stroke: false, color: '"
+      << color
+      << "'}\n";
+
+    std::string str_ll;
+    str_ll = std::to_string((long double)lat);
+    str_ll += ",";
+    str_ll += std::to_string((long double)lon);
+
+    strm
+      << " var c = new L.circle([" << str_ll << "], opt).addTo(map);\n";
+
+    m_additions.push_back(strm.str());
+
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////////
   //WLeaflet::Polygon
   //draw a weight of 1 pixel and opacity .1 for border 
   ///////////////////////////////////////////////////////////////////////////////////////

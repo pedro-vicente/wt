@@ -1138,21 +1138,22 @@ private:
 
   void listen(WApplication *app)
   {
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-    WApplication::UpdateLock uiLock(app);
-    if (uiLock)
+    while (true)
     {
-      m_iter++;
-      m_text->setText(Wt::asString(m_iter));
-      app->triggerUpdate();
-    }
-    else
-    {
-      return;
+      std::this_thread::sleep_for(std::chrono::seconds(3));
+      WApplication::UpdateLock uiLock(app);
+      if (uiLock)
+      {
+        m_iter++;
+        m_text->setText(Wt::asString(m_iter));
+        app->triggerUpdate();
+      }
+      else
+      {
+        return;
+      }
     }
   }
-
-
 };
 
 //////////////////////////////////////////////////////////////////////////////////////

@@ -25,6 +25,8 @@ using namespace Wt;
 //[37.0902, -95.7129], 5 US
 ///////////////////////////////////////////////////////////////////////////////////////
 
+typedef WMapbox WMap;
+
 class MapApplication : public WApplication
 {
 public:
@@ -34,29 +36,51 @@ public:
   {
     m_hbox = root()->setLayout(cpp14::make_unique<WVBoxLayout>());
     m_text = m_hbox->addWidget(cpp14::make_unique<WText>(Wt::asString(m_iter)));
-    m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMapbox>());
+    m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>());
     m_leaflet->Circle(38.9072, -77.0369, m_iter, "#ff0000");
 
-    m_timer = cpp14::make_unique<WTimer>();
-    m_timer->setInterval(std::chrono::milliseconds{ 6000 });
-    m_timer->timeout().connect(this, &MapApplication::tick);
-    m_timer->start();
+    enableUpdates(true);
+    if (m_listen_thread.joinable())
+    {
+      m_listen_thread.join();
+    }
+    m_listen_thread = std::thread(std::bind(&MapApplication::listen, this));
+  }
+  virtual ~MapApplication()
+  {
+    if (m_listen_thread.get_id() != std::this_thread::get_id() && m_listen_thread.joinable())
+    {
+      m_listen_thread.join();
+    }
   }
 
 private:
   WVBoxLayout *m_hbox;
   WText *m_text;
-  WMapbox *m_leaflet;
+  WMap *m_leaflet;
   size_t m_iter;
-  std::unique_ptr<WTimer> m_timer;
+  std::thread m_listen_thread;
 
-  void tick()
+  void listen()
   {
-    m_iter += 100;
-    m_text->setText(Wt::asString(m_iter));
-    m_leaflet->removeFromParent();
-    m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMapbox>());
-    m_leaflet->Circle(38.9072, -77.0369, m_iter, "#ff0000");
+    while (true)
+    {
+      std::this_thread::sleep_for(std::chrono::seconds(7));
+      WApplication::UpdateLock uiLock(this);
+      if (uiLock)
+      {
+        m_iter += 100;
+        m_text->setText(Wt::asString(m_iter));
+        m_leaflet->removeFromParent();
+        m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>());
+        m_leaflet->Circle(38.9072, -77.0369, m_iter, "#ff0000");
+        triggerUpdate();
+      }
+      else
+      {
+        return;
+      }
+    }
   }
 };
 
