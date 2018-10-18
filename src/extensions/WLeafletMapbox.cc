@@ -24,10 +24,18 @@ namespace Wt
     this->addCssRule("body", "height: 100%;");
 
     Wt::WApplication *app = Wt::WApplication::instance();
+
+#if defined (_DEBUG)
+    app->useStyleSheet("leaflet.css");
+    const std::string leaflet = "leaflet.js";
+    const std::string mapbox_gl = "mapbox-gl.js";
+#else
     app->useStyleSheet("https://unpkg.com/leaflet@1.0.3/dist/leaflet.css");
     const std::string leaflet = "https://unpkg.com/leaflet@1.0.3/dist/leaflet.js";
-    app->useStyleSheet("https://api.tiles.mapbox.com/mapbox-gl-js/v0.35.1/mapbox-gl.css");
     const std::string mapbox_gl = "https://api.tiles.mapbox.com/mapbox-gl-js/v0.35.1/mapbox-gl.js";
+#endif
+
+    app->useStyleSheet("https://api.tiles.mapbox.com/mapbox-gl-js/v0.35.1/mapbox-gl.css");
     const std::string leaflet_mapbox_gl = "leaflet-mapbox-gl.js";
     app->require(leaflet, "leaflet");
     app->require(mapbox_gl, "mapbox_gl");

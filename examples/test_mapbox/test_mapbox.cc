@@ -30,20 +30,21 @@ class MapApplication : public WApplication
 public:
   MapApplication(const WEnvironment& env) :
     WApplication(env),
-    m_iter(0)
+    m_iter(300)
   {
-    auto hbox = root()->setLayout(cpp14::make_unique<WVBoxLayout>());
-    m_text = hbox->addWidget(cpp14::make_unique<WText>(Wt::asString(m_iter)));
-    m_leaflet = hbox->addWidget(cpp14::make_unique<WMapbox>());
-    m_leaflet->Circle(38.9072, -77.0369, 500, "#ff0000");
+    m_hbox = root()->setLayout(cpp14::make_unique<WVBoxLayout>());
+    m_text = m_hbox->addWidget(cpp14::make_unique<WText>(Wt::asString(m_iter)));
+    m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMapbox>());
+    m_leaflet->Circle(38.9072, -77.0369, m_iter, "#ff0000");
 
     m_timer = cpp14::make_unique<WTimer>();
-    m_timer->setInterval(std::chrono::milliseconds{ 4000 });
+    m_timer->setInterval(std::chrono::milliseconds{ 6000 });
     m_timer->timeout().connect(this, &MapApplication::tick);
     m_timer->start();
   }
 
 private:
+  WVBoxLayout *m_hbox;
   WText *m_text;
   WMapbox *m_leaflet;
   size_t m_iter;
@@ -51,8 +52,11 @@ private:
 
   void tick()
   {
-    m_iter++;
+    m_iter += 100;
     m_text->setText(Wt::asString(m_iter));
+    m_leaflet->removeFromParent();
+    m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMapbox>());
+    m_leaflet->Circle(38.9072, -77.0369, m_iter, "#ff0000");
   }
 };
 
