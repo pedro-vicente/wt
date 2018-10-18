@@ -8,6 +8,10 @@
 #include <Wt/WPushButton.h>
 #include <Wt/WStringListModel.h>
 #include <Wt/WTemplate.h>
+#include <Wt/WProgressBar.h>
+#include <Wt/WTimer.h>
+#include <thread>
+#include <chrono>
 #include "extensions/WLeaflet.hh"
 #include "extensions/WLeafletMapbox.hh"
 using namespace Wt;
@@ -24,16 +28,20 @@ using namespace Wt;
 class MapApplication : public WApplication
 {
 public:
-  MapApplication(const WEnvironment& env) : WApplication(env)
+  MapApplication(const WEnvironment& env) :
+    WApplication(env),
+    m_iter(0)
   {
     auto hbox = root()->setLayout(cpp14::make_unique<WVBoxLayout>());
-    std::unique_ptr<WText> text = cpp14::make_unique<WText>("item 1");
-    hbox->addWidget(std::move(text));
-    std::unique_ptr<WMapbox> leaflet = cpp14::make_unique<WMapbox>();
-
-    leaflet->Circle(38.9072, -77.0369, 500, "#ff0000");
-    hbox->addWidget(std::move(leaflet));
+    m_text = hbox->addWidget(cpp14::make_unique<WText>(Wt::asString(m_iter)));
+    m_leaflet = hbox->addWidget(cpp14::make_unique<WMapbox>());
+    m_leaflet->Circle(38.9072, -77.0369, 500, "#ff0000");
   }
+
+private:
+  WText *m_text;
+  WMapbox *m_leaflet;
+  size_t m_iter;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
