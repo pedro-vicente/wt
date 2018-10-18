@@ -1113,39 +1113,46 @@ public:
     m_iter(0)
   {
     m_text = this->addWidget(cpp14::make_unique<WText>(Wt::asString(m_iter)));
-    m_timer = cpp14::make_unique<WTimer>();
-    m_timer->setInterval(std::chrono::milliseconds{ 1000 });
-    m_timer->timeout().connect(this, &PushWidget::tick);
-    m_timer->start();
+    WApplication *app = WApplication::instance();
+    app->enableUpdates(true);
+    if (m_listen_thread.joinable())
+    {
+      m_listen_thread.join();
+    }
+    m_listen_thread = std::thread(std::bind(&PushWidget::listen, this, app));
+  }
+
+  virtual ~PushWidget()
+  {
+    if (m_listen_thread.get_id() != std::this_thread::get_id() && m_listen_thread.joinable())
+    {
+      m_listen_thread.join();
+    }
   }
 
 private:
-  std::unique_ptr<WTimer> m_timer;
+
   WText *m_text;
   size_t m_iter;
+  std::thread m_listen_thread;
 
-  void tick()
+  void listen(WApplication *app)
   {
-    m_timer->stop();
-    WApplication *app = WApplication::instance();
-    app->enableUpdates(true);
-    while (true)
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+    WApplication::UpdateLock uiLock(app);
+    if (uiLock)
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-      WApplication::UpdateLock uiLock(app);
-      if (uiLock)
-      {
-        m_iter++;
-        m_text->setText(Wt::asString(m_iter));
-        app->triggerUpdate();
-        app->processEvents();
-      }
-      else
-      {
-        return;
-      }
+      m_iter++;
+      m_text->setText(Wt::asString(m_iter));
+      app->triggerUpdate();
+    }
+    else
+    {
+      return;
     }
   }
+
+
 };
 
 //////////////////////////////////////////////////////////////////////////////////////
