@@ -25,7 +25,7 @@ using namespace Wt;
 //[37.0902, -95.7129], 5 US
 ///////////////////////////////////////////////////////////////////////////////////////
 
-typedef WMapbox WMap;
+typedef WLeaflet WMap;
 
 class MapApplication : public WApplication
 {
@@ -36,7 +36,7 @@ public:
   {
     m_hbox = root()->setLayout(cpp14::make_unique<WVBoxLayout>());
     m_text = m_hbox->addWidget(cpp14::make_unique<WText>(Wt::asString(m_iter)));
-    m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>());
+    m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::CARTODB, 38.9072, -77.0369, 13));
     m_leaflet->Circle(38.9072, -77.0369, m_iter, "#ff0000");
 
     enableUpdates(true);
@@ -72,7 +72,7 @@ private:
         m_iter += 100;
         m_text->setText(Wt::asString(m_iter));
         m_leaflet->removeFromParent();
-        m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>());
+        m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::CARTODB, 38.9072, -77.0369, 13));
         m_leaflet->Circle(38.9072, -77.0369, m_iter, "#ff0000");
         triggerUpdate();
       }
