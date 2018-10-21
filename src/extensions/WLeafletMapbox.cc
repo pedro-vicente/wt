@@ -122,7 +122,7 @@ namespace Wt
       << radius
       << ", stroke: false, color: '"
       << color
-      << "'}\n";
+      << "'};\n";
 
     std::string str_ll;
     str_ll = std::to_string((long double)lat);

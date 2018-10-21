@@ -132,7 +132,7 @@ namespace Wt
     Wt::WStringStream strm;
 
     strm
-      << " var opt = {radius: 100, stroke: false, color: '#ff0000'}\n";
+      << " var opt = {radius: 100, stroke: false, color: '#ff0000'};\n";
 
     std::string str_ll;
     str_ll = lat;
@@ -156,7 +156,7 @@ namespace Wt
     strm
       << " var opt = {radius: 100, stroke: false, color: '"
       << color
-      << "'}\n";
+      << "'};\n";
 
     std::string str_ll;
     str_ll = std::to_string((long double)lat);
@@ -181,7 +181,7 @@ namespace Wt
     strm
       << " var opt = {radius: 1000, stroke: false, color: '"
       << color
-      << "'}\n";
+      << "'};\n";
 
     std::string str_ll;
     str_ll = lat;
@@ -208,7 +208,7 @@ namespace Wt
       << radius
       << ", stroke: false, color: '"
       << color
-      << "'}\n";
+      << "'};\n";
 
     std::string str_ll;
     str_ll = std::to_string((long double)lat);
