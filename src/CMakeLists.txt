@@ -388,8 +388,6 @@ JQuery_js.C
 #extensions
 extensions/WLeaflet.cc
 extensions/WLeaflet.hh
-extensions/WLeafletMapbox.cc
-extensions/WLeafletMapbox.hh
 extensions/WPlotly.cc
 extensions/WPlotly.hh
 extensions/WCesium.cc

@@ -33,7 +33,6 @@
 #include <thread>
 #include <chrono>
 #include "extensions/WLeaflet.hh"
-#include "extensions/WLeafletMapbox.hh"
 using namespace Wt;
 
 unsigned short port = 2000;
@@ -205,7 +204,7 @@ public:
   {
     m_hbox = root()->setLayout(cpp14::make_unique<WVBoxLayout>());
     m_text = m_hbox->addWidget(cpp14::make_unique<WText>(Wt::asString(100)));
-    m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::CARTODB, 38.9072, -77.0369, 13));
+    m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::MAPBOX, 38.9072, -77.0369, 13));
     m_leaflet->Circle(38.9072, -77.0369, 100, "#ff0000");
 
     enableUpdates(true);
@@ -258,7 +257,7 @@ private:
       {
         m_text->setText(Wt::asString(level));
         m_leaflet->removeFromParent();
-        m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::CARTODB, 38.9072, -77.0369, 13));
+        m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::MAPBOX, 38.9072, -77.0369, 13));
         m_leaflet->Circle(lat, lon, level * 20, "#ff0000");
         triggerUpdate();
       }

@@ -33,14 +33,22 @@ namespace Wt
     this->addCssRule("body", "height: 100%");
     this->addCssRule("#" + id(), "position:relative; top:0; bottom:0; height: 100%");
     WApplication *app = WApplication::instance();
+
 #if defined (_DEBUG)
     app->useStyleSheet("leaflet.css");
     const std::string leaflet = "leaflet.js";
+    const std::string mapbox_gl = "mapbox-gl.js";
 #else
-    app->useStyleSheet("https://unpkg.com/leaflet@1.2.0/dist/leaflet.css");
-    const std::string leaflet = "https://unpkg.com/leaflet@1.2.0/dist/leaflet.js";
+    app->useStyleSheet("https://unpkg.com/leaflet@1.0.3/dist/leaflet.css");
+    const std::string leaflet = "https://unpkg.com/leaflet@1.0.3/dist/leaflet.js";
+    const std::string mapbox_gl = "https://api.tiles.mapbox.com/mapbox-gl-js/v0.35.1/mapbox-gl.js";
 #endif
+    app->useStyleSheet("https://api.tiles.mapbox.com/mapbox-gl-js/v0.35.1/mapbox-gl.css");
+    const std::string leaflet_mapbox_gl = "leaflet-mapbox-gl.js";
     app->require(leaflet, "leaflet");
+    app->require(mapbox_gl, "mapbox_gl");
+    app->require(leaflet_mapbox_gl, "leaflet_mapbox_gl");
+
   }
   ///////////////////////////////////////////////////////////////////////////////////////
   //WLeaflet::render
@@ -62,6 +70,14 @@ namespace Wt
       Wt::WApplication * app = Wt::WApplication::instance();
       Wt::WString initFunction = app->javaScriptClass() + ".init_leaflet_" + id();
       Wt::WStringStream strm;
+      std::string mapbox_key;
+      bool read = Wt::WApplication::readConfigurationProperty("mapbox_api_key", mapbox_key);
+
+      std::string str_z = std::to_string((int)m_zoom);
+      std::string ll;
+      ll = std::to_string((long double)m_lat);
+      ll += ",";
+      ll += std::to_string((long double)m_lon);
 
       strm
         << "{ " << initFunction.toUTF8() << " = function() {\n"
@@ -87,20 +103,27 @@ namespace Wt
           << "  attribution: '&copy; <a href=http://www.openstreetmap.org/copyright>OpenStreetMap</a>, &copy; <a href=https://carto.com/attribution>CARTO</a>'\n"
           << "  });\n";
       }
+      else if (m_tile == tile_provider_t::MAPBOX)
+      {
+        strm
+          << "  var map = L.map(self).setView([" << ll << "], " << str_z << ");\n";
+        strm
+          << "  var gl = L.mapboxGL({\n"
+          << "  accessToken:'" << mapbox_key << "',\n"
+          << "  style: 'mapbox://styles/mapbox/streets-v9'\n"
+          << "  }).addTo(map);\n";
+      }
 
-      std::string str_z = std::to_string((int)m_zoom);
-      std::string str_ll;
-      str_ll = std::to_string((long double)m_lat);
-      str_ll += ",";
-      str_ll += std::to_string((long double)m_lon);
-
-      strm
-        << "  var map = new L.Map(self, {\n"
-        << "  center: new L.LatLng(" << str_ll << "), \n"
-        << "  zoom: " << str_z << ",\n"
-        << "  scrollWheelZoom: false,\n"
-        << "  layers: [layer_base]\n"
-        << "  });\n";
+      if (m_tile == tile_provider_t::CARTODB || m_tile == tile_provider_t::RRZE)
+      {
+        strm
+          << "  var map = new L.Map(self, {\n"
+          << "  center: new L.LatLng(" << ll << "), \n"
+          << "  zoom: " << str_z << ",\n"
+          << "  scrollWheelZoom: false,\n"
+          << "  layers: [layer_base]\n"
+          << "  });\n";
+      }
 
       strm << "self.map = map;";
 
@@ -114,7 +137,7 @@ namespace Wt
         << "}\n"
         << initFunction.toUTF8() << "();\n";
 
-      if (0) LOG_INFO(strm.str());
+      if (1) LOG_INFO(strm.str());
 
       m_additions.clear();
       app->doJavaScript(strm.str(), true);
