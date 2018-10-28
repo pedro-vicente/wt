@@ -27,6 +27,9 @@
 #include <Wt/WTemplate.h>
 #include <Wt/WProgressBar.h>
 #include <Wt/WTimer.h>
+#include <Wt/Json/Parser.h>
+#include <Wt/Json/Object.h>
+#include <Wt/Json/Array.h>
 #include <thread>
 #include <chrono>
 #include "extensions/WLeaflet.hh"
@@ -198,13 +201,12 @@ class MapApplication : public WApplication
 {
 public:
   MapApplication(const WEnvironment& env) :
-    WApplication(env),
-    m_value(300)
+    WApplication(env)
   {
     m_hbox = root()->setLayout(cpp14::make_unique<WVBoxLayout>());
-    m_text = m_hbox->addWidget(cpp14::make_unique<WText>(Wt::asString(m_value)));
+    m_text = m_hbox->addWidget(cpp14::make_unique<WText>(Wt::asString(100)));
     m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::CARTODB, 38.9072, -77.0369, 13));
-    m_leaflet->Circle(38.9072, -77.0369, m_value, "#ff0000");
+    m_leaflet->Circle(38.9072, -77.0369, 100, "#ff0000");
 
     enableUpdates(true);
     if (m_listen_thread.joinable())
@@ -227,8 +229,6 @@ private:
   WVBoxLayout *m_hbox;
   WText *m_text;
   WMap *m_leaflet;
-  //value received in listening socket
-  int m_value;
   std::thread m_listen_thread;
   tcp_server_t m_server;
 
@@ -241,16 +241,25 @@ private:
       int recv_size = m_server.read_all(socket_client_fd, buf, sizeof(buf));
       std::string str(buf);
       str.resize(recv_size);
-      m_value = std::stoi(str);
+     
+      Json::Array result;
+      Json::parse(str, result);
+      std::string name = result[0];
+      int id = result[1];
+      double lat = result[2];
+      double lon = result[3];
+      long long time = result[4];
+      int level = result[5];
+
       std::this_thread::sleep_for(std::chrono::seconds(5));
 
       WApplication::UpdateLock uiLock(this);
       if (uiLock)
       {
-        m_text->setText(Wt::asString(m_value));
+        m_text->setText(Wt::asString(level));
         m_leaflet->removeFromParent();
         m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::CARTODB, 38.9072, -77.0369, 13));
-        m_leaflet->Circle(38.9072, -77.0369, m_value * 20, "#ff0000");
+        m_leaflet->Circle(lat, lon, level * 20, "#ff0000");
         triggerUpdate();
       }
       else

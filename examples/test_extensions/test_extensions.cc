@@ -69,10 +69,7 @@ star_dataset_t find_dataset(std::string name);
 //schools
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//-t 6 -d ../../../examples/test_extensions/montgomery_county_schools.csv
-//-g ../../../examples/test_extensions/montgomery_county_boundary.json 
-//-m ../../../examples/test_extensions/wmata_stations.json
-//-z ../../../examples/test_extensions/md_maryland_zip_codes_geo.min.json
+//-t 6 -d ../../../examples/test_extensions/data/montgomery_county_schools.csv -g ../../../examples/test_extensions/data/montgomery_county_boundary.json -m ../../../examples/test_extensions/data/wmata_stations.json -z ../../../examples/test_extensions/data/md_maryland_zip_codes_geo.min.json
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //example 7
@@ -549,7 +546,7 @@ public:
       cpp14::make_unique<WLeaflet>(tile_provider_t::CARTODB, 39.0443047898, -77.1731281364, 11);
 
     marker_icon_t marker_green(
-      "https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
+      "https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
       "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
       icon_size_t(25, 41),
       icon_size_t(12, 41),
@@ -557,7 +554,7 @@ public:
       icon_size_t(41, 41));
 
     marker_icon_t marker_red(
-      "https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+      "https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
       "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
       icon_size_t(25, 41),
       icon_size_t(12, 41),
