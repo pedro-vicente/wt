@@ -78,6 +78,7 @@ namespace Wt
     void Polygon(const std::vector<double> &lat, const std::vector<double> &lon, const std::string &color);
     void Marker(const std::string &lat, const std::string &lon, const std::string &text);
     void Marker(const std::string &lat, const std::string &lon, const std::string &text, marker_icon_t icon);
+    void Marker(const double lat, const double lon, const std::string &text, marker_icon_t icon);
 
   protected:
     tile_provider_t m_tile;

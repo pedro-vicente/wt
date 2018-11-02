@@ -37,6 +37,14 @@ using namespace Wt;
 
 unsigned short port = 2000;
 
+marker_icon_t marker_violet(
+  "https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png",
+  "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+  icon_size_t(25, 41),
+  icon_size_t(12, 41),
+  icon_size_t(1, -34),
+  icon_size_t(41, 41));
+
 ///////////////////////////////////////////////////////////////////////////////////////
 //tcp_server_t
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -202,10 +210,15 @@ public:
   MapApplication(const WEnvironment& env) :
     WApplication(env)
   {
+    int test = 0;
     m_hbox = root()->setLayout(cpp14::make_unique<WVBoxLayout>());
     m_text = m_hbox->addWidget(cpp14::make_unique<WText>(Wt::asString(100)));
-    m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::MAPBOX, 38.9072, -77.0369, 13));
-    m_leaflet->Circle(38.9072, -77.0369, 100, "#ff0000");
+    m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::CARTODB, 38.9072, -77.0369, 13));
+    if (test)
+    {
+      m_leaflet->Circle(38.9072, -77.0369, 100, "#ff0000");
+      m_leaflet->Marker(38.9072, -77.0369, "test", marker_violet);
+    }
 
     enableUpdates(true);
     if (m_listen_thread.joinable())
@@ -240,7 +253,7 @@ private:
       int recv_size = m_server.read_all(socket_client_fd, buf, sizeof(buf));
       std::string str(buf);
       str.resize(recv_size);
-     
+
       Json::Array result;
       Json::parse(str, result);
       std::string name = result[0];
@@ -250,15 +263,16 @@ private:
       long long time = result[4];
       int level = result[5];
 
-      std::this_thread::sleep_for(std::chrono::seconds(5));
+      std::this_thread::sleep_for(std::chrono::seconds(2));
 
       WApplication::UpdateLock uiLock(this);
       if (uiLock)
       {
         m_text->setText(Wt::asString(level));
         m_leaflet->removeFromParent();
-        m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::MAPBOX, 38.9072, -77.0369, 13));
-        m_leaflet->Circle(lat, lon, level * 20, "#ff0000");
+        m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::CARTODB, 38.9072, -77.0369, 13));
+        m_leaflet->Circle(lat, lon, level * 12, "#ff0000");
+        m_leaflet->Marker(lat, lon, "test", marker_violet);
         triggerUpdate();
       }
       else
