@@ -32,10 +32,13 @@
 #include <Wt/Json/Array.h>
 #include <thread>
 #include <chrono>
+#include <cstring>
 #include "extensions/WLeaflet.hh"
+#include "sensor_receive.hh"
 using namespace Wt;
 
 unsigned short port = 2000;
+sensor_receive_t get_sensor_data(const std::string &buf_);
 
 marker_icon_t marker_violet(
   "https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png",
@@ -243,6 +246,7 @@ private:
   WMap *m_leaflet;
   std::thread m_listen_thread;
   tcp_server_t m_server;
+  std::vector<sensor_receive_t> sensors;
 
   void listen()
   {
@@ -253,26 +257,36 @@ private:
       int recv_size = m_server.read_all(socket_client_fd, buf, sizeof(buf));
       std::string str(buf);
       str.resize(recv_size);
-
-      Json::Array result;
-      Json::parse(str, result);
-      std::string name = result[0];
-      int id = result[1];
-      double lat = result[2];
-      double lon = result[3];
-      long long time = result[4];
-      int level = result[5];
-
+      sensor_receive_t sensor = get_sensor_data(str);
+      int has = 0;
+      for (int idx = 0; idx < sensors.size(); idx++)
+      {
+        if (sensors.at(idx).id == sensor.id)
+        {
+          has = 1;
+          //update level
+          sensors.at(idx).level = sensor.level;
+          break;
+        }
+      }
+      if (has == 0)
+      {
+        //insert new sensor
+        sensors.push_back(sensor);
+      }
       std::this_thread::sleep_for(std::chrono::seconds(2));
-
       WApplication::UpdateLock uiLock(this);
       if (uiLock)
       {
-        m_text->setText(Wt::asString(level));
+        m_text->setText(Wt::asString(sensor.level));
         m_leaflet->removeFromParent();
         m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::CARTODB, 38.9072, -77.0369, 13));
-        m_leaflet->Circle(lat, lon, level * 12, "#ff0000");
-        m_leaflet->Marker(lat, lon, "test", marker_violet);
+        for (int idx = 0; idx < sensors.size(); idx++)
+        {
+          sensor_receive_t sn = sensors.at(idx);
+          m_leaflet->Circle(sn.lat, sn.lon, sn.level * 12, "#ff0000");
+          m_leaflet->Marker(sn.lat, sn.lon, sn.name, marker_violet);
+        }
         triggerUpdate();
       }
       else
@@ -297,3 +311,19 @@ int main(int argc, char **argv)
   return WRun(argc, argv, &create_application);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+//get_sensor_data
+///////////////////////////////////////////////////////////////////////////////////////
+
+sensor_receive_t get_sensor_data(const std::string &buf)
+{
+  Json::Array result;
+  Json::parse(buf, result);
+  std::string name = result[0];
+  int id = result[1];
+  double lat = result[2];
+  double lon = result[3];
+  long long time = result[4];
+  int level = result[5];
+  return sensor_receive_t(name, id, lat, lon, time, level);
+}
