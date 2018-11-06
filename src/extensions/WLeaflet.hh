@@ -68,7 +68,7 @@ namespace Wt
   class WT_API WLeaflet : public WCompositeWidget
   {
   public:
-    WLeaflet(tile_provider_t tile, double lat, double lon, int zoom);
+    WLeaflet(tile_provider_t tile, double lat, double lon, int zoom, bool verbose = false);
     void MouseDown(const Wt::WMouseEvent &e);
 
     void Circle(const std::string &lat, const std::string &lon);

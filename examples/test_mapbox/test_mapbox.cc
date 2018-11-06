@@ -216,7 +216,7 @@ public:
     int test = 0;
     m_hbox = root()->setLayout(cpp14::make_unique<WVBoxLayout>());
     m_text = m_hbox->addWidget(cpp14::make_unique<WText>(Wt::asString(100)));
-    m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::CARTODB, 38.9072, -77.0369, 13));
+    m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::CARTODB, 38.9072, -77.0369, 13, false));
     if (test)
     {
       m_leaflet->Circle(38.9072, -77.0369, 100, "#ff0000");
@@ -257,6 +257,7 @@ private:
       int recv_size = m_server.read_all(socket_client_fd, buf, sizeof(buf));
       std::string str(buf);
       str.resize(recv_size);
+      std::cout << str.c_str() << "\n";
       sensor_receive_t sensor = get_sensor_data(str);
       int has = 0;
       for (int idx = 0; idx < sensors.size(); idx++)
@@ -280,11 +281,11 @@ private:
       {
         m_text->setText(Wt::asString(sensor.level));
         m_leaflet->removeFromParent();
-        m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::CARTODB, 38.9072, -77.0369, 13));
+        m_leaflet = m_hbox->addWidget(cpp14::make_unique<WMap>(tile_provider_t::CARTODB, 38.9072, -77.0369, 13, false));
         for (int idx = 0; idx < sensors.size(); idx++)
         {
           sensor_receive_t sn = sensors.at(idx);
-          m_leaflet->Circle(sn.lat, sn.lon, sn.level * 12, "#ff0000");
+          m_leaflet->Circle(sn.lat, sn.lon, sn.level * 10, "#ff0000");
           m_leaflet->Marker(sn.lat, sn.lon, sn.name, marker_violet);
         }
         triggerUpdate();

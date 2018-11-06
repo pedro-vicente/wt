@@ -12,6 +12,8 @@
 
 #include "extensions/WLeaflet.hh"
 
+bool gverbose_debug = false;
+
 namespace Wt
 {
   LOGGER("WLeaflet");
@@ -20,7 +22,7 @@ namespace Wt
   //WLeaflet::WLeaflet
   ///////////////////////////////////////////////////////////////////////////////////////
 
-  WLeaflet::WLeaflet(tile_provider_t tile, double lat, double lon, int zoom) :
+  WLeaflet::WLeaflet(tile_provider_t tile, double lat, double lon, int zoom, bool verbose) :
     m_tile(tile),
     m_lat(lat),
     m_lon(lon),
@@ -34,21 +36,35 @@ namespace Wt
     this->addCssRule("#" + id(), "position:relative; top:0; bottom:0; height: 100%");
     WApplication *app = WApplication::instance();
 
-#if defined (_DEBUG)
-    app->useStyleSheet("leaflet.css");
-    const std::string leaflet = "leaflet.js";
-    const std::string mapbox_gl = "mapbox-gl.js";
-#else
-    app->useStyleSheet("https://unpkg.com/leaflet@1.0.3/dist/leaflet.css");
-    const std::string leaflet = "https://unpkg.com/leaflet@1.0.3/dist/leaflet.js";
-    const std::string mapbox_gl = "https://api.tiles.mapbox.com/mapbox-gl-js/v0.35.1/mapbox-gl.js";
-#endif
-    app->useStyleSheet("https://api.tiles.mapbox.com/mapbox-gl-js/v0.35.1/mapbox-gl.css");
-    const std::string leaflet_mapbox_gl = "leaflet-mapbox-gl.js";
-    app->require(leaflet, "leaflet");
-    app->require(mapbox_gl, "mapbox_gl");
-    app->require(leaflet_mapbox_gl, "leaflet_mapbox_gl");
+    std::string leaflet = "leaflet.js";
+    std::string mapbox_gl = "mapbox-gl.js";
+    std::string leaflet_mapbox_gl = "leaflet-mapbox-gl.js";
 
+    if (verbose)
+    {
+      gverbose_debug = true;
+      app->useStyleSheet("leaflet.css");
+      leaflet = "leaflet.js";
+      mapbox_gl = "mapbox-gl.js";
+      leaflet_mapbox_gl = "leaflet-mapbox-gl.js";
+    }
+    else
+    {
+      app->useStyleSheet("https://unpkg.com/leaflet@1.0.3/dist/leaflet.css");
+      leaflet = "https://unpkg.com/leaflet@1.0.3/dist/leaflet.js";
+      if (m_tile == tile_provider_t::MAPBOX)
+      {
+        mapbox_gl = "https://api.tiles.mapbox.com/mapbox-gl-js/v0.35.1/mapbox-gl.js";
+        app->useStyleSheet("https://api.tiles.mapbox.com/mapbox-gl-js/v0.35.1/mapbox-gl.css");
+        leaflet_mapbox_gl = "https://rawgit.com/mapbox/mapbox-gl-leaflet/master/leaflet-mapbox-gl.js";
+      }
+    }
+    app->require(leaflet, "leaflet");
+    if (m_tile == tile_provider_t::MAPBOX)
+    {
+      app->require(mapbox_gl, "mapbox_gl");
+      app->require(leaflet_mapbox_gl, "leaflet_mapbox_gl");
+    }
   }
   ///////////////////////////////////////////////////////////////////////////////////////
   //WLeaflet::render
@@ -137,7 +153,7 @@ namespace Wt
         << "}\n"
         << initFunction.toUTF8() << "();\n";
 
-      if (1) LOG_INFO(strm.str());
+      if (gverbose_debug) LOG_INFO(strm.str());
 
       m_additions.clear();
       app->doJavaScript(strm.str(), true);
