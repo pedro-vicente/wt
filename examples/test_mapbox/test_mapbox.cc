@@ -74,6 +74,7 @@ public:
   int listen(const unsigned short server_port);
   int accept_client();
   int read_all(int socket_client_fd, void *_buf, int size_buf);
+  std::string read_response(int socket_client_fd);
   void close_socket()
   {
 #if defined (_MSC_VER)
@@ -196,6 +197,52 @@ int tcp_server_t::read_all(int socket_client_fd, void *_buf, int size_buf)
   return total_recv_size;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//read_response
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+std::string tcp_server_t::read_response(int socket_client_fd)
+{
+  int recv_size; // size in bytes received or -1 on error 
+  size_t size_json = 0; //in bytes
+  std::string str_header;
+  std::string str;
+
+  //parse header, one character at a time and look for for separator #
+  //assume size header lenght less than 20 digits
+  for (size_t idx = 0; idx < 20; idx++)
+  {
+    char c;
+    if ((recv_size = recv(socket_client_fd, &c, 1, 0)) == -1)
+    {
+      std::cout << "recv error: " << strerror(errno) << std::endl;
+      return str;
+    }
+    if (c == '#')
+    {
+      break;
+    }
+    else
+    {
+      str_header += c;
+    }
+  }
+
+  //get size
+  size_json = static_cast<size_t>(atoi(str_header.c_str()));
+
+  //read from socket with known size
+  char *buf = new char[size_json];
+  if (read_all(socket_client_fd, buf, size_json) < 0)
+  {
+    std::cout << "recv error: " << strerror(errno) << std::endl;
+    return str;
+  }
+  std::string str_json(buf, size_json);
+  delete[] buf;
+  return str_json;
+}
+
 //run
 //./leaflet_mapbox.wt --http-address=0.0.0.0 --http-port=8080  --docroot=. -c wt_config.xml
 
@@ -252,13 +299,14 @@ private:
   {
     while (true)
     {
-      char buf[255];
       int socket_client_fd = m_server.accept_client();
-      int recv_size = m_server.read_all(socket_client_fd, buf, sizeof(buf));
-      std::string str(buf);
-      str.resize(recv_size);
-      std::cout << str.c_str() << "\n";
-      sensor_receive_t sensor = get_sensor_data(str);
+      if (socket_client_fd == -1)
+      {
+        return;
+      }
+      std::string message = m_server.read_response(socket_client_fd);
+      std::cout << message.c_str() << "\n";
+      sensor_receive_t sensor = get_sensor_data(message);
       int has = 0;
       for (int idx = 0; idx < sensors.size(); idx++)
       {
