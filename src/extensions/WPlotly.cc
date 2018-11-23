@@ -59,8 +59,11 @@ namespace Wt
 
       //pass 'DIV', data object MUST named 'data', layout object MUST named 'layout'
       strm
-        << "  Plotly.newPlot(" << jsRef()
-        << "  , data, layout)\n";
+        << "  Plotly.newPlot(self, data, layout);\n";
+
+      strm
+        << "self.on('plotly_click', function(data){"
+        << "});";
 
       strm
         << "  setTimeout(function(){ delete " << initFunction.toUTF8() << ";}, 0)};\n"
