@@ -1092,10 +1092,18 @@ public:
     js += "}";
     js += "};";
 
-    std::unique_ptr<WPlotly> plotly = cpp14::make_unique<WPlotly>(js);
-    root()->addWidget(Wt::cpp14::make_unique<Wt::WText>("Plot"));
-    root()->addWidget(std::move(plotly));
+    WVBoxLayout *hbox;
+    WText *text;
+    hbox = root()->setLayout(cpp14::make_unique<WVBoxLayout>());
+    text = hbox->addWidget(cpp14::make_unique<WText>(Wt::asString("Dow")));
+    plotly = hbox->addWidget(cpp14::make_unique<WPlotly>(js));
+    plotly->clicked().connect([=](WPlotly::Coordinate c)
+    {
+      std::cerr << "Clicked at coordinate (" << c.x() << "," << c.y() << ")";
+    });
   }
+
+  WPlotly *plotly;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////

@@ -16,10 +16,58 @@ namespace Wt
   LOGGER("WPlotly");
 
   ///////////////////////////////////////////////////////////////////////////////////////
+  //Coordinate
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+  WPlotly::Coordinate::Coordinate() :
+    m_x(0),
+    m_y(0)
+  {
+  }
+
+  WPlotly::Coordinate::Coordinate(time_t x, double y)
+  {
+    set_x(x);
+    set_y(y);
+  }
+
+  WPlotly::Coordinate::Coordinate(const std::pair<time_t, double>& x_y)
+  {
+    set_x(x_y.first);
+    set_y(x_y.second);
+  }
+
+  void WPlotly::Coordinate::set_x(time_t x)
+  {
+    m_x = x;
+  }
+
+  void WPlotly::Coordinate::set_y(double y)
+  {
+    m_y = y;
+  }
+
+  std::pair<time_t, double> WPlotly::Coordinate::operator ()() const
+  {
+    return std::make_pair(m_x, m_y);
+  }
+
+  std::istream& operator >> (std::istream& i, WPlotly::Coordinate& c)
+  {
+    time_t x;
+    double y;
+    i >> x >> std::ws >> y;
+    c.set_x(x);
+    c.set_y(y);
+    return i;
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////////
   //WPlotly::WPlotly
   ///////////////////////////////////////////////////////////////////////////////////////
 
-  WPlotly::WPlotly(const std::string &js)
+  WPlotly::WPlotly(const std::string &js) :
+    m_clicked(this, "click")
   {
     setImplementation(std::unique_ptr<WWidget>(new WContainerWidget()));
     this->addCssRule("html", "height: 100%");
@@ -63,6 +111,16 @@ namespace Wt
 
       strm
         << "self.on('plotly_click', function(data){"
+        << "var str = data.points[0].x;"
+        << "var year = str.substr(0, 4);"
+        << "var month = str.substr(5, 2);"
+        << "var day = str.substr(8, 2);"
+        << "var hour = str.substr(11, 2);"
+        << "var min = str.substr(14, 2);"
+        << "var d = new Date(year, month, day, hour, min, 0, 0);"
+        << "var n = d.getTime();"
+        << m_clicked.createCall({ "n +' '+ data.points[0].y" })
+        << ";"
         << "});";
 
       strm
