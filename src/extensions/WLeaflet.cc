@@ -9,14 +9,59 @@
 #include <utility>
 #include <iostream>
 #include <cmath>
-
 #include "extensions/WLeaflet.hh"
 
-bool gverbose_debug = false;
+bool gverbose_debug = true;
 
 namespace Wt
 {
   LOGGER("WLeaflet");
+
+  ///////////////////////////////////////////////////////////////////////////////////////
+  //Coordinate
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+  WLeaflet::Coordinate::Coordinate() :
+    m_lat(0),
+    m_lon(0)
+  {
+  }
+
+  WLeaflet::Coordinate::Coordinate(double lat, double lon)
+  {
+    setLatitude(lat);
+    setLongitude(lon);
+  }
+
+  WLeaflet::Coordinate::Coordinate(const std::pair<double, double>& lat_long)
+  {
+    setLatitude(lat_long.first);
+    setLongitude(lat_long.second);
+  }
+
+  void WLeaflet::Coordinate::setLatitude(double latitude)
+  {
+    m_lat = latitude;
+  }
+
+  void WLeaflet::Coordinate::setLongitude(double longitude)
+  {
+    m_lon = longitude;
+  }
+
+  std::pair<double, double> WLeaflet::Coordinate::operator ()() const
+  {
+    return std::make_pair(m_lat, m_lon);
+  }
+
+  std::istream& operator >> (std::istream& i, WLeaflet::Coordinate& c)
+  {
+    double lat, lon;
+    i >> lat >> std::ws >> lon;
+    c.setLatitude(lat);
+    c.setLongitude(lon);
+    return i;
+  }
 
   ///////////////////////////////////////////////////////////////////////////////////////
   //WLeaflet::WLeaflet
@@ -26,7 +71,9 @@ namespace Wt
     m_tile(tile),
     m_lat(lat),
     m_lon(lon),
-    m_zoom(zoom)
+    m_zoom(zoom),
+    m_clicked(this, "click"),
+    m_double_clicked(this, "dblclick")
   {
     auto container{ new Wt::WContainerWidget };
     setImplementation(std::unique_ptr<WWidget>(container));
@@ -143,6 +190,9 @@ namespace Wt
 
       strm << "self.map = map;";
 
+      stream_listener(m_clicked, "click", strm);
+      stream_listener(m_double_clicked, "dblclick", strm);
+
       for (size_t idx = 0; idx < m_additions.size(); idx++)
       {
         strm << m_additions[idx];
@@ -163,25 +213,51 @@ namespace Wt
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////
+  //WLeaflet::do_javascript
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+  void WLeaflet::do_javascript(const std::string& jscode)
+  {
+    if (isRendered())
+    {
+      doJavaScript(jscode);
+    }
+    else
+    {
+      m_additions.push_back(jscode);
+    }
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////////
+  //WLeaflet::stream_listener
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+  void WLeaflet::stream_listener(const JSignal<Coordinate> &signal, std::string signalName, Wt::WStringStream &strm)
+  {
+    strm <<
+      "map.on('" << signalName << "', function(event) { "
+      << signal.createCall({ "event.latlng.lat +' '+ event.latlng.lng" })
+      << ";"
+      "});";
+    if (gverbose_debug) LOG_INFO(strm.str());
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////////
   //WLeaflet::Circle
   ///////////////////////////////////////////////////////////////////////////////////////
 
   void WLeaflet::Circle(const std::string &lat, const std::string &lon)
   {
     Wt::WStringStream strm;
-
     strm
       << " var opt = {radius: 100, stroke: false, color: '#ff0000'};\n";
-
     std::string str_ll;
     str_ll = lat;
     str_ll += ",";
     str_ll += lon;
-
     strm
-      << " var c = new L.circle([" << str_ll << "], opt).addTo(map);\n";
-
-    m_additions.push_back(strm.str());
+      << " var c = new L.circle([" << str_ll << "], opt).addTo(" << jsRef() << ".map);\n";
+    do_javascript(strm.str());
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////
@@ -191,22 +267,17 @@ namespace Wt
   void WLeaflet::Circle(const double lat, const double lon, const std::string &color)
   {
     Wt::WStringStream strm;
-
     strm
       << " var opt = {radius: 100, stroke: false, color: '"
       << color
       << "'};\n";
-
     std::string str_ll;
     str_ll = std::to_string((long double)lat);
     str_ll += ",";
     str_ll += std::to_string((long double)lon);
-
     strm
-      << " var c = new L.circle([" << str_ll << "], opt).addTo(map);\n";
-
-    m_additions.push_back(strm.str());
-
+      << " var c = new L.circle([" << str_ll << "], opt).addTo(" << jsRef() << ".map);\n";
+    do_javascript(strm.str());
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////
@@ -216,21 +287,17 @@ namespace Wt
   void WLeaflet::Circle(const std::string &lat, const std::string &lon, const std::string &color)
   {
     Wt::WStringStream strm;
-
     strm
       << " var opt = {radius: 1000, stroke: false, color: '"
       << color
       << "'};\n";
-
     std::string str_ll;
     str_ll = lat;
     str_ll += ",";
     str_ll += lon;
-
     strm
-      << " var c = new L.circle([" << str_ll << "], opt).addTo(map);\n";
-
-    m_additions.push_back(strm.str());
+      << " var c = new L.circle([" << str_ll << "], opt).addTo(" << jsRef() << ".map);\n";
+    do_javascript(strm.str());
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////
@@ -241,24 +308,19 @@ namespace Wt
   {
     Wt::WStringStream strm;
     std::string str_clr = std::to_string((long double)radius);
-
     strm
       << " var opt = {radius:"
       << radius
       << ", stroke: false, color: '"
       << color
       << "'};\n";
-
     std::string str_ll;
     str_ll = std::to_string((long double)lat);
     str_ll += ",";
     str_ll += std::to_string((long double)lon);
-
     strm
-      << " var c = new L.circle([" << str_ll << "], opt).addTo(map);\n";
-
-    m_additions.push_back(strm.str());
-
+      << " var c = new L.circle([" << str_ll << "], opt).addTo(" << jsRef() << ".map);\n";
+    do_javascript(strm.str());
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////
@@ -266,19 +328,15 @@ namespace Wt
   //draw a weight of 1 pixel and opacity .1 for border 
   ///////////////////////////////////////////////////////////////////////////////////////
 
-  void WLeaflet::Polygon(const std::vector<double> &lat, const std::vector<double> &lon,
-    const std::string &color)
+  void WLeaflet::Polygon(const std::vector<double> &lat, const std::vector<double> &lon, const std::string &color)
   {
     Wt::WStringStream strm;
-
     if (lat.size() == 0)
     {
       return;
     }
-
     strm
       << "var vert = [ [";
-
     for (size_t idx = 0; idx < lat.size() - 1; idx++)
     {
       strm
@@ -287,7 +345,6 @@ namespace Wt
         << std::to_string((long double)lon.at(idx))
         << "], [";
     }
-
     //last
     size_t idx = lat.size() - 1;
     strm
@@ -295,13 +352,11 @@ namespace Wt
       << ","
       << std::to_string((long double)lon.at(idx))
       << "] ];";
-
     strm
       << "L.polygon(vert,{color:'"
       << color
-      << "',opacity:.1,weight:1}).addTo(map);";
-
-    m_additions.push_back(strm.str());
+      << "',opacity:.1,weight:1}).addTo(" << jsRef() << ".map);";
+    do_javascript(strm.str());
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////
@@ -316,11 +371,11 @@ namespace Wt
     str_ll += ",";
     str_ll += lon;
     strm
-      << " L.marker([" << str_ll << "]).addTo(map)"
+      << " L.marker([" << str_ll << "]).addTo(" << jsRef() << ".map)"
       << ".bindPopup('"
       << text
       << "');\n";
-    m_additions.push_back(strm.str());
+    do_javascript(strm.str());
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////
@@ -330,7 +385,6 @@ namespace Wt
   void WLeaflet::Marker(const std::string &lat, const std::string &lon, const std::string &text, marker_icon_t icon)
   {
     Wt::WStringStream strm;
-
     strm
       << "var custom_icon = new L.Icon({"
       << "iconUrl: '"
@@ -344,17 +398,16 @@ namespace Wt
       << "popupAnchor: [1, -34],"
       << "shadowSize: [41, 41]"
       << "});\n";
-
     std::string str_ll;
     str_ll = lat;
     str_ll += ",";
     str_ll += lon;
     strm
-      << " L.marker([" << str_ll << "], {icon: custom_icon}).addTo(map)"
+      << " L.marker([" << str_ll << "], {icon: custom_icon}).addTo(" << jsRef() << ".map)"
       << ".bindPopup('"
       << text
       << "');\n";
-    m_additions.push_back(strm.str());
+    do_javascript(strm.str());
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////
@@ -368,7 +421,6 @@ namespace Wt
     ll += ",";
     ll += std::to_string((long double)lon);
     Wt::WStringStream strm;
-
     strm
       << "var custom_icon = new L.Icon({"
       << "iconUrl: '"
@@ -383,10 +435,10 @@ namespace Wt
       << "shadowSize: [41, 41]"
       << "});\n";
     strm
-      << " L.marker([" << ll << "], {icon: custom_icon}).addTo(map)"
+      << " L.marker([" << ll << "], {icon: custom_icon}).addTo(" << jsRef() << ".map)"
       << ".bindPopup('"
       << text
       << "');\n";
-    m_additions.push_back(strm.str());
+    do_javascript(strm.str());
   }
 }
