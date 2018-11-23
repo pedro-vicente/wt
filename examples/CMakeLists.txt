@@ -271,4 +271,5 @@ SUBDIRS(
   wtwithqt
   test_extensions
   test_mapbox
+  test_chart
 )
