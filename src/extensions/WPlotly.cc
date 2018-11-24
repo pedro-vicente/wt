@@ -117,8 +117,9 @@ namespace Wt
         << "var day = str.substr(8, 2);"
         << "var hour = str.substr(11, 2);"
         << "var min = str.substr(14, 2);"
-        << "var d = new Date(year, month, day, hour, min, 0, 0);"
+        << "var d = new Date(year, month - 1, day, hour, min, 0, 0);"
         << "var n = d.getTime();"
+        << "console.log(d);"
         << m_clicked.createCall({ "n +' '+ data.points[0].y" })
         << ";"
         << "});";

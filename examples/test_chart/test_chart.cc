@@ -16,7 +16,7 @@
 #include <fstream>
 using namespace Wt;
 
-//./test_chart.wt --http-address=0.0.0.0 --http-port=8080  --docroot=. -d ../../../examples/test_extensions/data/DJI_2018_minor.3600.txt
+//./test_chart.wt --http-address=0.0.0.0 --http-port=8080  --docroot=. -d ../../../examples/test_chart/DJI_2018_minor.3600.txt
 
 std::string file_plotly;
 
@@ -53,140 +53,13 @@ public:
   {};
   std::vector<time_price_t> m_tp;
   int read(const std::string &file_name);
+  void write(const std::string &file_name);
+  void reset_wave(const std::string &wave);
+  void set_wave(time_t time, const std::string &wave);
   int m_interval; //seconds
   std::string m_period;
   std::string m_ticker;
 };
-
-///////////////////////////////////////////////////////////////////////////////////////
-//Application_plotly
-///////////////////////////////////////////////////////////////////////////////////////
-
-class Application_plotly : public WApplication
-{
-public:
-  Application_plotly(const WEnvironment& env) : WApplication(env)
-  {
-    setTitle("Chart");
-    model_t reader;
-    std::string js;
-    if (reader.read(file_plotly) < 0)
-    {
-      assert(0);
-      return;
-    }
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////
-    // time/price
-    /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    js += "var x_time = [];";
-    js += "var y_price = [];";
-    js += "var x_wave = [];";
-    js += "var y_wave = [];";
-    js += "var y_wave_label = [];";
-    size_t nbr_rows = reader.m_tp.size();
-    for (size_t idx = 0; idx < nbr_rows; idx++)
-    {
-      time_price_t tp = reader.m_tp.at(idx);
-      WDateTime date;
-      date.setTime_t(std::time_t(tp.time));
-      WString str_time = date.toString("yyyy-MM-dd-hh:mm:ss");
-      js += "x_time.push('";
-      js += str_time.toUTF8();
-      js += "');";
-      js += "y_price.push(";
-      js += std::to_string(tp.value);
-      js += ");";
-      if (tp.wave != "-")
-      {
-        js += "x_wave.push('";
-        js += str_time.toUTF8();
-        js += "');";
-        js += "y_wave.push(";
-        js += std::to_string(tp.value);
-        js += ");";
-        js += "y_wave_label.push(";
-        js += tp.wave;
-        js += ");";
-      }
-    }
-
-    js += "var trace_price = {";
-    js += "x: x_time,";
-    js += "y: y_price,";
-    js += "mode: 'lines',";
-    js += "type: 'scatter'";
-    js += "};";
-
-    js += "var trace_wave = {";
-    js += "x: x_wave,";
-    js += "y: y_wave,";
-    js += "text: y_wave_label,";
-    js += "mode: 'markers+text',";
-    js += "type: 'scatter',";
-    js += "marker: {size: 15, color:'rgb(0,255,0)'}";
-    js += "};";
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////
-    // "data", "layout" objects
-    // Note: data object MUST named 'data', layout object MUST named 'layout'
-    /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    js += "var data = [trace_price, trace_wave];";
-    js += "var layout = {";
-    js += "yaxis: {";
-    js += "tickformat: '.0'";
-    js += "}";
-    js += "};";
-
-    WVBoxLayout *hbox;
-    WText *text;
-    hbox = root()->setLayout(cpp14::make_unique<WVBoxLayout>());
-    text = hbox->addWidget(cpp14::make_unique<WText>(Wt::asString("Dow")));
-    plotly = hbox->addWidget(cpp14::make_unique<WPlotly>(js));
-    plotly->clicked().connect([=](WPlotly::Coordinate c)
-    {
-      std::cerr << "Clicked at coordinate (" << c.x() << "," << c.y() << ")";
-    });
-  }
-
-  WPlotly *plotly;
-};
-
-///////////////////////////////////////////////////////////////////////////////////////
-//create_application
-///////////////////////////////////////////////////////////////////////////////////////
-
-std::unique_ptr<WApplication> create_application(const WEnvironment& env)
-{
-  return cpp14::make_unique<Application_plotly>(env);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////
-//main
-///////////////////////////////////////////////////////////////////////////////////////
-
-int main(int argc, char **argv)
-{
-  std::string data_file;
-  for (int i = 1; i < argc; i++)
-  {
-    if (argv[i][0] == '-')
-    {
-      switch (argv[i][1])
-      {
-      case 'd':
-        data_file = argv[i + 1];
-        i++;
-        break;
-      }
-    }
-  }
-  std::cout << data_file << std::endl;
-  file_plotly = data_file;
-  return WRun(argc, argv, &create_application);
-}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //model_t::read
@@ -242,3 +115,201 @@ int model_t::read(const std::string &file_name)
   ifs.close();
   return 0;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//model_t::write
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void model_t::write(const std::string &file_name)
+{
+  std::ofstream ofs(file_name, std::ios::out | std::ios::binary);
+  ofs << m_ticker << "\n";
+  ofs << m_period << "\n";
+  ofs << m_interval << "\n";
+  size_t size = m_tp.size();
+  ofs << size << "\n";
+  for (size_t idx = 0; idx < size; idx++)
+  {
+    ofs << m_tp.at(idx).time << ","
+      << m_tp.at(idx).value << ","
+      << m_tp.at(idx).wave << ","
+      << m_tp.at(idx).trade << "\n";
+  }
+  ofs.close();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//model_t::reset_wave
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void model_t::reset_wave(const std::string &wave)
+{
+  size_t size = m_tp.size();
+  for (size_t idx = 0; idx < size; idx++)
+  {
+    if (m_tp.at(idx).wave == wave)
+    {
+      m_tp.at(idx).wave = "-";
+    }
+  }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//model_t::set_wave
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void model_t::set_wave(time_t time, const std::string &wave)
+{
+  size_t size = m_tp.size();
+  for (size_t idx = 0; idx < size; idx++)
+  {
+    time_price_t tp = m_tp.at(idx);
+    if (tp.time > time)
+    {
+      m_tp.at(idx).wave = wave;
+      break;
+    }
+  }
+
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+//Application_plotly
+///////////////////////////////////////////////////////////////////////////////////////
+
+class Application_plotly : public WApplication
+{
+public:
+  WPlotly *m_plotly;
+  model_t m_model;
+
+  Application_plotly(const WEnvironment& env) : WApplication(env)
+  {
+    setTitle("Chart");
+    if (m_model.read(file_plotly) < 0)
+    {
+      assert(0);
+      return;
+    }
+    std::string js = set_data();
+    WVBoxLayout *hbox;
+    WText *text;
+    hbox = root()->setLayout(cpp14::make_unique<WVBoxLayout>());
+    text = hbox->addWidget(cpp14::make_unique<WText>(Wt::asString("Dow")));
+    m_plotly = hbox->addWidget(cpp14::make_unique<WPlotly>(js));
+    m_plotly->clicked().connect([=](WPlotly::Coordinate c)
+    {
+      std::cerr << "Clicked at coordinate (" << c.x() << "," << c.y() << ")";
+      this->update_model(c.x() / 1000);
+    });
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////////
+  //update_model()
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+  void update_model(time_t time)
+  {
+    Wt::WStringStream strm;
+    m_model.reset_wave("2");
+    m_model.set_wave(time, "2");
+    m_model.write(file_plotly);
+    strm
+      << set_data();
+    strm
+      << "var self = " << m_plotly->jsRef() << ";\n"
+      << "Plotly.react(self, data, layout);";
+    m_plotly->doJavaScript(strm.str());
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////////
+  //set_data()
+  // "data", "layout" objects
+  // Note: data object MUST named 'data', layout object MUST named 'layout'
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  std::string set_data()
+  {
+    Wt::WStringStream strm;
+    strm
+      << "var x_time = []; var y_price = []; var x_wave = []; var y_wave = []; var y_wave_label = [];";
+    size_t nbr_rows = m_model.m_tp.size();
+    for (size_t idx = 0; idx < nbr_rows; idx++)
+    {
+      time_price_t tp = m_model.m_tp.at(idx);
+      WDateTime date;
+      date.setTime_t(std::time_t(tp.time));
+      WString str_time = date.toString("yyyy-MM-dd-hh:mm:ss");
+      strm
+        << "x_time.push('" << str_time.toUTF8() << "');"
+        << "y_price.push(" << std::to_string(tp.value) << ");";
+      if (tp.wave != "-")
+      {
+        strm
+          << "x_wave.push('" << str_time.toUTF8() << "');"
+          << "y_wave.push(" << std::to_string(tp.value) << ");"
+          << "y_wave_label.push(" << tp.wave << ");";
+      }
+    }
+    strm
+      << "var trace_price = {"
+      << "x: x_time,"
+      << "y: y_price,"
+      << "mode: 'lines',"
+      << "type: 'scatter'"
+      << "};";
+    strm
+      << "var trace_wave = {"
+      << "x: x_wave,"
+      << "y: y_wave,"
+      << "text: y_wave_label,"
+      << "mode: 'markers+text',"
+      << "type: 'scatter',"
+      << "marker: {size: 15, color:'rgb(0,255,0)'}"
+      << "};";
+    strm
+      << "var data = [trace_price, trace_wave];"
+      "var layout = {"
+      "yaxis: {"
+      "tickformat: '.0'"
+      "}"
+      "};";
+    return strm.str();
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////////////
+//create_application
+///////////////////////////////////////////////////////////////////////////////////////
+
+std::unique_ptr<WApplication> create_application(const WEnvironment& env)
+{
+  return cpp14::make_unique<Application_plotly>(env);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+//main
+///////////////////////////////////////////////////////////////////////////////////////
+
+int main(int argc, char **argv)
+{
+  std::string data_file;
+  for (int i = 1; i < argc; i++)
+  {
+    if (argv[i][0] == '-')
+    {
+      switch (argv[i][1])
+      {
+      case 'd':
+        data_file = argv[i + 1];
+        i++;
+        break;
+      }
+    }
+  }
+  std::cout << data_file << std::endl;
+  file_plotly = data_file;
+  return WRun(argc, argv, &create_application);
+}
+
