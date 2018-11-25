@@ -49,16 +49,19 @@ public:
 class model_t
 {
 public:
-  model_t()
+  model_t() :
+    m_idx_curr(0)
   {};
   std::vector<time_price_t> m_tp;
   int read(const std::string &file_name);
   void write(const std::string &file_name);
   void reset_wave(const std::string &wave);
-  void set_wave(time_t time, const std::string &wave);
+  void set_wave(const std::string &wave);
+  void set_index(time_t time); //set time index based on mouse input
   int m_interval; //seconds
   std::string m_period;
   std::string m_ticker;
+  size_t m_idx_curr;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +161,17 @@ void model_t::reset_wave(const std::string &wave)
 //model_t::set_wave
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void model_t::set_wave(time_t time, const std::string &wave)
+void model_t::set_wave(const std::string &wave)
+{
+  m_tp.at(m_idx_curr).wave = wave;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//model_t::set_wave
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void model_t::set_index(time_t time)
 {
   size_t size = m_tp.size();
   for (size_t idx = 0; idx < size; idx++)
@@ -166,13 +179,14 @@ void model_t::set_wave(time_t time, const std::string &wave)
     time_price_t tp = m_tp.at(idx);
     if (tp.time > time)
     {
-      m_tp.at(idx).wave = wave;
+      m_idx_curr = idx;
       break;
     }
   }
-
 }
 
+const WColor color_grey = WColor();
+const WColor color_green = WColor(0, 255, 0, 128);
 
 ///////////////////////////////////////////////////////////////////////////////////////
 //Application_plotly
@@ -182,27 +196,61 @@ class Application_plotly : public WApplication
 {
 public:
   WPlotly *m_plotly;
+  WPushButton *wave_0;
+  WPushButton *wave_1;
   model_t m_model;
+  std::string m_wave;
 
-  Application_plotly(const WEnvironment& env) : WApplication(env)
+  Application_plotly(const WEnvironment& env) :
+    WApplication(env),
+    m_wave("0")
   {
     setTitle("Chart");
+    useStyleSheet("boxes.css");
     if (m_model.read(file_plotly) < 0)
     {
       assert(0);
       return;
     }
-    std::string js = set_data();
-    WVBoxLayout *hbox;
-    WText *text;
-    hbox = root()->setLayout(cpp14::make_unique<WVBoxLayout>());
-    text = hbox->addWidget(cpp14::make_unique<WText>(Wt::asString("Dow")));
-    m_plotly = hbox->addWidget(cpp14::make_unique<WPlotly>(js));
+
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //layout
+    ///////////////////////////////////////////////////////////////////////////////////////
+
+    auto container = Wt::cpp14::make_unique<Wt::WContainerWidget>();
+    container->setStyleClass("yellow-box");
+    WVBoxLayout *hbox = container->setLayout(cpp14::make_unique<WVBoxLayout>());
+
+    WText *text = hbox->addWidget(cpp14::make_unique<WText>(Wt::asString("Dow")));
+    text->setStyleClass("green-box");
+
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //buttons
+    ///////////////////////////////////////////////////////////////////////////////////////
+
+    wave_0 = hbox->addWidget(cpp14::make_unique<WPushButton>("0"));
+    wave_0->setWidth(70);
+    wave_0->clicked().connect(this, &Application_plotly::set_wave_0);
+    wave_1 = hbox->addWidget(cpp14::make_unique<WPushButton>("1"));
+    wave_1->setWidth(70);
+    wave_1->clicked().connect(this, &Application_plotly::set_wave_1);
+
+    wave_0->decorationStyle().setBackgroundColor(color_green);
+    wave_1->decorationStyle().setBackgroundColor(color_grey);
+
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //plot
+    ///////////////////////////////////////////////////////////////////////////////////////
+
+    m_plotly = hbox->addWidget(cpp14::make_unique<WPlotly>(set_data()));
+    text->setStyleClass("blue-box");
     m_plotly->clicked().connect([=](WPlotly::Coordinate c)
     {
       std::cerr << "Clicked at coordinate (" << c.x() << "," << c.y() << ")";
       this->update_model(c.x() / 1000);
     });
+
+    root()->addWidget(std::move(container));
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////
@@ -211,10 +259,10 @@ public:
 
   void update_model(time_t time)
   {
+    m_model.set_index(time);
+    m_model.reset_wave(m_wave);
+    m_model.set_wave(m_wave);
     Wt::WStringStream strm;
-    m_model.reset_wave("2");
-    m_model.set_wave(time, "2");
-    m_model.write(file_plotly);
     strm
       << set_data();
     strm
@@ -235,7 +283,7 @@ public:
     strm
       << "var x_time = []; var y_price = []; var x_wave = []; var y_wave = []; var y_wave_label = [];";
     size_t nbr_rows = m_model.m_tp.size();
-    for (size_t idx = 0; idx < nbr_rows; idx++)
+    for (size_t idx = 0; idx < nbr_rows / 2; idx++)
     {
       time_price_t tp = m_model.m_tp.at(idx);
       WDateTime date;
@@ -276,6 +324,24 @@ public:
       "}"
       "};";
     return strm.str();
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////////
+  //set_wave_()
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+  void set_wave_0()
+  {
+    wave_0->decorationStyle().setBackgroundColor(color_green);
+    wave_1->decorationStyle().setBackgroundColor(color_grey);
+    m_wave = "0";
+  }
+
+  void set_wave_1()
+  {
+    wave_0->decorationStyle().setBackgroundColor(color_grey);
+    wave_1->decorationStyle().setBackgroundColor(color_green);
+    m_wave = "1";
   }
 };
 
