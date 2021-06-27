@@ -239,7 +239,6 @@ ENDMACRO(WT_ADD_EXAMPLE)
 
 SUBDIRS(
   blog
-  charts
   chart3D
   codeview
   composer
@@ -266,7 +265,6 @@ SUBDIRS(
   treeview
   treeview-dragdrop
   webgl
-  widgetgallery
   wt-homepage
   wtwithqt
   test_extensions

@@ -2102,26 +2102,7 @@ time_zone::time_zone(const std::string& s, detail::undocumented)
     }
 }
 
-time_zone::time_zone(std::chrono::seconds offset, detail::undocumented)
-    : name_("Unknown"),
-      adjusted_(new std::once_flag{})
-{
-    zonelets_.push_back(detail::zonelet{});
-    detail::zonelet &zonelet = zonelets_.back();
-    zonelet.format_ = "Unknown";
-    zonelet.initial_abbrev_ = "";
-    zonelet.initial_save_ = std::chrono::minutes{0};
-    zonelet.first_rule_ = {nullptr, year::min()};
-    zonelet.last_rule_ = {nullptr, year::max()};
-    zonelet.gmtoff_ = offset;
-    zonelet.tag_ = detail::zonelet::is_empty;
-    zonelet.until_year_ = year::max();
-    zonelet.until_date_ = MonthDayTime{max_day, tz::utc};
-    zonelet.until_utc_ = zonelet.until_date_.to_sys(zonelet.until_year_, zonelet.gmtoff_, std::chrono::seconds{0});
-    zonelet.until_std_ = local_seconds{zonelet.until_utc_.time_since_epoch()} + zonelet.gmtoff_;
-    zonelet.until_loc_ = zonelet.until_std_;
-    std::call_once(*adjusted_, []{});
-}
+
 
 sys_info
 time_zone::get_info_impl(sys_seconds tp) const

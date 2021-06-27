@@ -400,7 +400,6 @@ void Server::addTcpEndpoint(const asio::ip::tcp::endpoint &endpoint,
       (new TcpConnection(wt_.ioService(), this, connection_manager_,
                          request_handler_));
   } else {
-    LOG_WARN_S(&wt_, bindError(endpoint, errc));
     tcp_listeners_.pop_back();
   }
 }

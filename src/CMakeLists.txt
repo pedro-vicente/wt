@@ -351,6 +351,7 @@ web/CgiParser.C
 web/Configuration.C
 web/DomElement.C
 web/EscapeOStream.C
+web/EntryPoint.C
 web/FileServe.C
 web/ColorUtils.C
 web/ImageUtils.C
